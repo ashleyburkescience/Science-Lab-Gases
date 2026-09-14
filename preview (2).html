@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gas Laws Interactive Lab</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef3f8;color:#17212b}
+header{background:#17324d;color:white;padding:18px 24px;text-align:center}
+header h1{margin:0 0 6px;font-size:28px} header p{margin:0;opacity:.9}
+.tabs{display:flex;gap:4px;background:#fff;padding:10px;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px #0002}
+.tab{flex:1;padding:12px 8px;border:0;border-radius:8px;background:#dbe5ee;font-weight:700;cursor:pointer}
+.tab.active{background:#2e6f9e;color:white}
+.panel{display:none;padding:18px;max-width:1200px;margin:auto}.panel.active{display:block}
+.instructions{background:white;border-left:5px solid #2e6f9e;padding:12px 16px;border-radius:8px;margin-bottom:12px}
+.lab{position:relative;height:600px;background:linear-gradient(#dff2ff 0 65%,#d9e2e8 65%);border:2px solid #a9bac7;border-radius:14px;overflow:hidden}
+.shelf{position:absolute;left:0;right:0;bottom:0;height:34%;background:#c6d0d6;border-top:5px solid #8798a5}
+.item{position:absolute;cursor:grab;user-select:none;touch-action:none;z-index:8;pointer-events:auto}.item:active{cursor:grabbing}
+.btn{border:0;border-radius:7px;padding:9px 13px;background:#2e6f9e;color:white;font-weight:700;cursor:pointer}
+.reset{background:#667784;margin-left:6px}.timer{font-weight:bold;background:#17212b;color:white;border-radius:8px;padding:8px 12px;display:inline-block}
+.status{margin-top:10px;background:#fff;padding:10px;border-radius:8px;min-height:42px}
+.flask{width:170px;height:230px;left:47%;top:220px;position:absolute}
+.flask .neck{position:absolute;left:62px;top:0;width:46px;height:105px;border:5px solid #6b8799;border-bottom:0;background:#dff7ff99}
+.flask .body{position:absolute;left:16px;top:90px;width:138px;height:130px;border:5px solid #6b8799;border-top:0;border-radius:15px 15px 55px 55px;background:#dff7ff55}
+.flask .water{position:absolute;left:21px;top:175px;width:128px;height:40px;background:#63b8e8aa;border-radius:0 0 45px 45px}
+.balloon{width:92px;height:74px;border-radius:50% 50% 46% 46%;background:#e77a89;border:3px solid #a93e50;box-shadow:inset -10px -5px 0 #0001}
+.balloon:after{content:"";position:absolute;width:16px;height:24px;left:35px;top:64px;background:#e77a89;border:3px solid #a93e50;border-top:0;border-radius:0 0 6px 6px}
+.paper{width:45px;height:58px;background:#eee;border:2px solid #777;transform:rotate(10deg);font-size:12px;padding:5px;text-align:center}
+.paper.lit{background:#ffad33;box-shadow:0 0 18px #ff6a00}.paper.lit:after{content:"🔥";position:absolute;top:-27px;left:8px;font-size:28px}
+.lighter{width:45px;height:80px;background:#555;border-radius:8px 8px 12px 12px;color:#fff;text-align:center;padding-top:18px;font-size:11px}
+.lighter.on{box-shadow:0 0 16px #ff7b00}.lighter.on:before{content:"🔥";position:absolute;top:-35px;left:9px;font-size:30px}
+.flaskdrop{outline:3px dashed #2e6f9e55}
+.label{position:absolute;background:#ffffffdd;padding:5px 8px;border-radius:6px;font-size:13px;font-weight:bold;z-index:5}
+.can{width:100px;height:145px;background:linear-gradient(90deg,#aeb5bb,#e7eaec,#9da5aa);border:3px solid #707a80;border-radius:14px 14px 10px 10px}
+.can:before{content:"";position:absolute;left:13px;right:13px;top:-6px;height:12px;border:3px solid #707a80;border-radius:50%;background:#c9ced1}
+.can.crushed{height:75px;top:360px!important;transform:rotate(-5deg) skewX(-8deg);transition:.7s}
+.steam{position:absolute;width:16px;height:80px;border-radius:50%;border-left:5px solid #fff;filter:blur(1px);opacity:0;animation:steam 1.5s infinite}
+@keyframes steam{0%{transform:translateY(20px);opacity:0}40%{opacity:.8}100%{transform:translateY(-70px) translateX(15px);opacity:0}}
+.hotplate{width:180px;cursor:pointer;height:45px;background:#30343a;border-radius:12px;left:42%;top:470px;position:absolute;text-align:center;color:#fff;padding-top:13px;font-weight:bold}
+.hotplate.on{background:#8b302a;box-shadow:0 0 22px #ff6a0066}
+.cylinder{width:65px;height:190px;border:4px solid #637b8a;border-top:0;border-radius:0 0 12px 12px;position:absolute;background:#e9faff55}
+.cylinder:before{content:"";position:absolute;left:-7px;top:-7px;width:65px;height:12px;border:4px solid #637b8a;border-radius:8px;background:#eefcff}
+.waterlevel{position:absolute;bottom:0;left:3px;right:3px;height:45%;background:#5fb7e7aa}
+.scale{position:absolute;right:-31px;top:0;height:100%;font-size:10px;line-height:22px;color:#455}
+.beaker{width:145px;height:170px;border:5px solid #637b8a;border-top:0;border-radius:0 0 18px 18px;background:#eefcff55;position:absolute}
+.beaker:before{content:"";position:absolute;left:-8px;top:-7px;width:145px;height:10px;border:4px solid #637b8a;border-radius:7px}
+.beaker .water{position:absolute;bottom:0;left:3px;right:3px;height:58%;background:#58b9e7aa;border-radius:0 0 12px 12px}
+.kettle{width:125px;height:105px;border:5px solid #687782;border-radius:35% 35% 45% 45%;background:#d5dde1}
+.kettle:before{content:"";position:absolute;width:35px;height:65px;border:5px solid #687782;border-left:0;border-radius:0 30px 30px 0;right:-38px;top:15px}
+.kettle:after{content:"";position:absolute;width:50px;height:20px;border:5px solid #687782;border-bottom:0;border-radius:50px 50px 0 0;left:32px;top:-20px}
+.ballonSmall{transform-origin:center}.ice{background:repeating-linear-gradient(45deg,#bde8ff 0 13px,#fff 13px 25px)!important}
+.pan{position:absolute;width:300px;height:120px;border:7px solid #77838b;border-radius:20px;background:#64bde866;left:40%;top:350px}
+.pan:after{content:"ICE WATER";position:absolute;left:100px;top:43px;font-weight:bold;color:#24627f}
+.boil{position:absolute;left:35px;bottom:18px;width:70px;height:30px;background:#5fb7e7aa;border-radius:50%}
+.bubble{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:bubble 1s infinite}
+@keyframes bubble{0%{bottom:20px;opacity:0}50%{opacity:1}100%{bottom:55px;opacity:0}}
+.fire{position:absolute;font-size:34px;opacity:0}.hotplate.on + .fire{opacity:1}
+.canPour{position:absolute;left:45%;top:240px;transform:rotate(25deg)}
+.arrow{position:absolute;font-size:38px;color:#2e6f9e;font-weight:bold}
+.smallnote{font-size:12px;color:#52616b}
+@keyframes suck{from{transform:translate(0,0) scale(1)}to{transform:translate(0,145px) scale(.8)}}
+@keyframes grow{from{transform:scale(1)}to{transform:scale(1.75)}}
+@keyframes shrink{from{transform:scale(1.75)}to{transform:scale(1)}}
+@keyframes inflate{from{transform:scaleY(.5)}to{transform:scaleY(1.4)}}
+@keyframes deflate{from{transform:scaleY(1.4)}to{transform:scaleY(.5)}}
+.anim-suck{animation:suck 10s forwards}.anim-grow{animation:grow 10s forwards}.anim-shrink{animation:shrink 10s forwards}.anim-inflate{animation:inflate 10s forwards}.anim-deflate{animation:deflate 10s forwards}
+
+/* ---- polished classroom-lab redesign ---- */
+body{background:#f4f7fa;color:#1b2b3a;font-family:Inter,Segoe UI,Arial,sans-serif}
+header{background:#f8fbfd;color:#17324d;text-align:left;padding:18px 28px 14px;border-bottom:1px solid #c9d5df}
+header h1{font-size:34px;letter-spacing:-.5px;margin:0 0 4px}header p{color:#526476;font-size:15px}
+.tabs{padding:0 16px;background:#edf2f6;gap:0;box-shadow:none;border-bottom:1px solid #9fb0be;position:sticky}
+.tab{border-radius:12px 12px 0 0;background:linear-gradient(#f7f8fa,#d9dee3);border:1px solid #9aa9b6;border-bottom:0;padding:17px 12px;font-size:17px;color:#17212b;box-shadow:inset 0 1px #fff}
+.tab.active{background:linear-gradient(#356ba0,#24588a);color:white;border-color:#24588a}
+.panel{max-width:1500px;padding:12px 16px 24px}
+.instructions{background:#fff;border:2px solid #9bb4c6;border-left:2px solid #9bb4c6;border-radius:12px;padding:16px 18px;box-shadow:0 2px 6px #20304018;font-size:16px;line-height:1.5}
+.timer{background:#1c242a;border:4px solid #cbd4db;border-radius:14px;padding:10px 18px;font-size:22px;box-shadow:0 3px 7px #0002}
+.btn{border-radius:9px;padding:11px 16px;font-size:15px;box-shadow:0 2px 4px #0002}.reset{background:#56616c}
+.lab{height:680px;background:linear-gradient(180deg,#e8edf1 0 60%,#686d71 60% 61%,#45494c 61% 100%);border:2px solid #90a5b6;border-radius:14px;box-shadow:inset 0 2px 15px #00000018;overflow:hidden}
+.lab:before{content:"";position:absolute;pointer-events:none;inset:0 0 40% 0;background:linear-gradient(90deg,#d9e0e6 0 12%,#eef2f4 12% 31%,#d0dae2 31% 51%,#e6eaed 51% 72%,#c9d3dc 72% 100%);opacity:.55;filter:blur(1px)}
+.shelf{bottom:0;height:39%;background:linear-gradient(#51565a,#373b3e);border-top:8px solid #7a6249}
+.label{background:#f8fbfd;border:1px solid #c8d2da;color:#233646;padding:7px 11px;border-radius:8px;font-size:13px;box-shadow:0 2px 5px #0002}
+.status{background:#eef7ff;border:1px solid #9ec0dc;color:#1f405a;font-weight:600;box-shadow:0 2px 5px #0001}
+.lighter{width:50px;height:118px;background:linear-gradient(90deg,#be1f1f,#ed3d2f,#a51414);border:2px solid #7c1111;border-radius:8px 8px 11px 11px;color:#fff;padding-top:45px;box-shadow:inset -7px 0 #0002,0 3px 8px #0003}
+.lighter:after{content:"";position:absolute;width:32px;height:20px;left:7px;top:-8px;background:linear-gradient(#bbb,#555);border:2px solid #444;border-radius:4px}
+.paper{width:58px;height:48px;background:#f6f1df;border:1px solid #baa;box-shadow:0 3px 7px #0002;transform:rotate(2deg);color:#5d5347;padding:14px 4px}
+.paper.lit{background:#f2d3a0;box-shadow:0 0 18px #ff8a00}.paper.lit:after{top:-35px;left:12px;font-size:35px}
+.balloon{width:98px;height:115px;background:radial-gradient(circle at 35% 30%,#63b4ff 0,#2b83dc 45%,#1269bd 100%);border:2px solid #1262ad;border-radius:50% 50% 46% 46%;box-shadow:inset -12px -12px 18px #003b7526,0 4px 8px #0002}
+.balloon:after{width:18px;height:18px;left:38px;top:105px;background:#2b83dc;border-color:#1262ad;border-radius:4px 4px 7px 7px}
+
+/* Section 1 photographic-style glassware */
+#flask1{width:220px;height:300px;left:45%;top:230px;position:absolute;z-index:6;outline:none;background:transparent;overflow:visible}
+#flask1 .flask-glass{display:block;width:100%;height:100%;filter:drop-shadow(0 5px 5px #0005);pointer-events:none}
+#lab1 #paper{z-index:7}
+#lab1 #balloon1{z-index:8;transform-origin:50% 50%}
+#lab1 .flaskdrop{outline:none}
+#lab1 .flaskdrop:after{content:"DROP ZONE";position:absolute;left:72px;bottom:-24px;font-size:10px;letter-spacing:.7px;color:#d9edf7;background:#24495fdd;border-radius:10px;padding:4px 8px;opacity:.78}
+@keyframes balloonThroughNeck{
+  0%{transform:translateY(0) scale(1,1)}
+  28%{transform:translateY(38px) scale(.62,.96)}
+  55%{transform:translateY(92px) scale(.36,1.12)}
+  72%{transform:translateY(128px) scale(.42,1.02)}
+  100%{transform:translateY(205px) scale(.78,.62)}
+}
+#balloon1.anim-suck{animation:balloonThroughNeck 10s cubic-bezier(.55,.04,.36,1) forwards}
+/* accurate Erlenmeyer silhouette */
+.flask{width:220px;height:300px;left:45%;top:230px;position:absolute;z-index:4}
+.flask .neck{left:78px;top:0;width:64px;height:117px;border:7px solid #3d637b;border-bottom:0;background:linear-gradient(90deg,#ffffff30,#d7f2ff65,#ffffff25);border-radius:8px 8px 0 0;box-shadow:inset 5px 0 #fff5}
+.flask .neck:before{content:"";position:absolute;left:-10px;top:-10px;width:74px;height:15px;border:5px solid #3d637b;border-radius:50%;background:#eaf9ff99}
+.flask .body{left:8px;top:91px;width:204px;height:199px;border:7px solid #3d637b;border-top:0;border-radius:10px 10px 40px 40px;background:linear-gradient(90deg,#ffffff48,#dff7ff60,#ffffff28);clip-path:polygon(31% 0,69% 0,100% 88%,96% 97%,85% 100%,15% 100%,4% 97%,0 88%);box-shadow:inset 12px 0 #fff6,0 2px 5px #16364a35}
+.flask .body:before{content:"";position:absolute;left:55px;top:23px;width:95px;height:1px;background:#68879b55;box-shadow:0 30px #68879b55,0 60px #68879b55,0 90px #68879b55}
+.flask .water{left:22px;top:230px;width:176px;height:52px;border-radius:15px 15px 34px 34px;background:#61b9e5aa;clip-path:polygon(4% 0,96% 0,100% 100%,0 100%)}
+.flaskdrop{outline:none}
+#p1 .instructions{position:absolute;z-index:11;left:28px;top:135px;width:385px;min-height:265px}
+#p1{position:relative;padding-top:10px}
+#p1>div:nth-of-type(2){position:absolute;z-index:15;right:42px;top:152px}
+#lab1{margin-top:340px;height:610px;margin-bottom:0}
+#lab1 .shelf{height:44%}
+#lighter{left:455px;top:160px}
+#paper{left:545px;top:190px}
+#flask1{left:47%;top:135px}
+#balloon1{left:72%;top:145px}
+#lab1>.label:first-of-type{left:435px!important;top:85px!important}
+#lab1>.label:nth-last-of-type(2){right:35px!important;top:85px!important}
+#s1{left:30px!important;right:30px!important;bottom:18px!important;background:#eff7fd}
+@keyframes squeezeDown{0%{transform:translateY(0) scale(1,1)}45%{transform:translateY(70px) scale(.48,1.12)}75%{transform:translateY(135px) scale(.42,.92)}100%{transform:translateY(220px) scale(.76,.62)}}
+.anim-suck{animation:squeezeDown 10s ease-in-out forwards}
+@media(max-width:900px){#p1 .instructions{position:relative;left:auto;top:auto;width:auto}.panel>div:nth-of-type(2){position:relative!important;right:auto!important;top:auto!important;margin-bottom:8px}#lab1{margin-top:8px}.tab{font-size:13px;padding:12px 6px}}
+
+
+#p3 .lab{height:640px}
+#p3 .shelf{height:38%}
+#p3 #beakerHot,#p3 #beakerCold{pointer-events:none}
+#p3 #balloon3{z-index:9;transition:left .35s,top .35s}
+@keyframes growInBeaker3{
+  from{transform:scale(1)}
+  to{transform:scale(1.42)}
+}
+@keyframes shrinkInBeaker3{
+  from{transform:scale(1.42)}
+  to{transform:scale(1)}
+}
+#p3 #balloon3.balloon-hot3{animation:growInBeaker3 10s forwards}
+#p3 #balloon3.balloon-cold3{animation:shrinkInBeaker3 10s forwards}
+
+#p4 #flask4{overflow:visible}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Section 4 balloon: fixed mouthpiece + two realistic body states */
+#p4 #flask4{overflow:visible}
+
+
+
+
+
+/* Deflated reference-like state: body droops left of the neck */
+
+
+
+/* Fully inflated state: round balloon directly above the flask.
+   Bottom narrows into the same collar/lip, so it remains visibly attached. */
+
+
+
+/* Animate path morph over the heating/cooling interval */
+
+
+
+/* Reliable Section 4 balloon states */
+#p4 #flask4{overflow:visible}
+#p4 #balloon4{overflow:visible}
+#p4 #balloon4 svg{overflow:visible}
+
+#p4 #balloonDeflatedGroup4,
+#p4 #balloonInflatedGroup4{
+  transform-box:fill-box;
+  transform-origin:center bottom;
+}
+
+/* Start/end: left-hanging, fully deflated */
+#p4 #balloon4.attached-deflated4 #balloonDeflatedGroup4{
+  opacity:1;
+  transform:scale(1);
+}
+#p4 #balloon4.attached-deflated4 #balloonInflatedGroup4{
+  opacity:0;
+  transform:scale(.18,.12);
+}
+
+/* Heating: upright balloon grows straight up from the fixed rim */
+#p4 #balloon4.attached-inflating4 #balloonDeflatedGroup4{
+  animation:fadeDeflated4 2s ease forwards;
+}
+#p4 #balloon4.attached-inflating4 #balloonInflatedGroup4{
+  animation:inflateStraight4 10s ease-in-out forwards;
+}
+
+/* Fully heated */
+#p4 #balloon4.attached-inflated4 #balloonDeflatedGroup4{
+  opacity:0;
+}
+#p4 #balloon4.attached-inflated4 #balloonInflatedGroup4{
+  opacity:1;
+  transform:scale(1);
+}
+
+/* Cooling: inflated balloon shrinks, deflated balloon reappears left */
+#p4 #balloon4.attached-deflating4 #balloonDeflatedGroup4{
+  animation:returnDeflated4 10s ease-in-out forwards;
+}
+#p4 #balloon4.attached-deflating4 #balloonInflatedGroup4{
+  animation:deflateStraight4 10s ease-in-out forwards;
+}
+
+@keyframes inflateStraight4{
+  0%{opacity:0;transform:scale(.18,.12)}
+  20%{opacity:.45;transform:scale(.35,.28)}
+  55%{opacity:.85;transform:scale(.68,.72)}
+  100%{opacity:1;transform:scale(1)}
+}
+@keyframes fadeDeflated4{
+  0%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes deflateStraight4{
+  0%{opacity:1;transform:scale(1)}
+  70%{opacity:.5;transform:scale(.38,.3)}
+  100%{opacity:0;transform:scale(.18,.12)}
+}
+@keyframes returnDeflated4{
+  0%,55%{opacity:0;transform:scale(.75)}
+  100%{opacity:1;transform:scale(1)}
+}
+
+
+/* Canvas LMS responsive layout */
+html,body{
+  max-width:100%;
+  overflow-x:hidden;
+}
+body{
+  margin:0;
+  padding:0;
+}
+.wrapper, main, .container{
+  max-width:100%;
+}
+.lab{
+  width:100%;
+  max-width:1180px;
+  margin-left:auto;
+  margin-right:auto;
+  transform-origin:top left;
+}
+.tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.tab{
+  flex:1 1 220px;
+  min-width:0;
+}
+.instructions{
+  max-width:calc(100% - 40px);
+  box-sizing:border-box;
+}
+@media (max-width: 1000px){
+  body{
+    font-size:15px;
+  }
+  .panel{
+    overflow:visible;
+  }
+  .lab{
+    transform:scale(.82);
+    width:121.95%;
+    margin-bottom:-110px;
+  }
+}
+@media (max-width: 800px){
+  .lab{
+    transform:scale(.68);
+    width:147.06%;
+    margin-bottom:-205px;
+  }
+  .instructions{
+    position:relative !important;
+    left:auto !important;
+    top:auto !important;
+    width:auto !important;
+    max-width:100% !important;
+    margin:12px 16px !important;
+    min-height:0 !important;
+  }
+  .panel>div:nth-of-type(2){
+    position:relative !important;
+    right:auto !important;
+    top:auto !important;
+    margin:10px 16px !important;
+  }
+  #lab1,#lab2,#lab3,#lab4{
+    margin-top:16px !important;
+  }
+}
+@media (max-width: 620px){
+  .tab{
+    flex:1 1 100%;
+  }
+  .lab{
+    transform:scale(.54);
+    width:185.19%;
+    margin-bottom:-315px;
+  }
+  .timer{
+    display:inline-block;
+    margin-bottom:8px;
+  }
+}
+
+</style>
+</head>
+<body>
+<header><h1>Interactive Gas Laws Laboratory</h1><p>Drag the equipment and materials to complete each investigation. Follow the on-screen prompts.</p></header>
+<div class="tabs">
+<button class="tab active" data-tab="1">1 · Paper & Flask</button>
+<button class="tab" data-tab="2">2 · Crushed Can</button>
+<button class="tab" data-tab="3">3 · Balloon & Temperature</button>
+<button class="tab" data-tab="4">4 · Flask Balloon</button>
+</div>
+
+<section id="p1" class="panel active">
+<div class="instructions"><b style="font-size:21px">Part 1: Burning Paper & Balloon</b><ol style="margin:10px 0 0 20px;padding:0"><li>Drag the lighter to the small piece of paper to ignite it.</li><li>Drag the lit paper and drop it into the Erlenmeyer flask.</li><li>Place the water balloon over the top of the flask.</li><li>Observe what happens over time.</li></ol><div style="margin-top:12px;background:#e8f3fb;border-radius:10px;padding:12px"><b>Think:</b> What is causing the balloon to be pulled into the flask?</div></div>
+<div><span class="timer" id="t1">Timer: 0 s</span> <button class="btn reset" onclick="reset1()">Reset</button></div>
+<div class="lab" id="lab1">
+<div class="shelf"></div><div class="label">1. Ignite the paper</div>
+<div class="lighter item" id="lighter" data-drag>LIGHTER</div>
+<div class="paper item" id="paper" data-drag>paper</div>
+<div class="flask flaskdrop" id="flask1" aria-label="250 mL Erlenmeyer flask">
+<svg class="flask-glass" viewBox="0 0 220 300" aria-hidden="true">
+<defs>
+  <linearGradient id="glassFill" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".42"/><stop offset=".22" stop-color="#cfefff" stop-opacity=".10"/><stop offset=".72" stop-color="#eaf8ff" stop-opacity=".18"/><stop offset="1" stop-color="#ffffff" stop-opacity=".52"/></linearGradient>
+  <linearGradient id="glassEdge" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#24495f"/><stop offset=".18" stop-color="#a9d3e8"/><stop offset=".5" stop-color="#3d637b"/><stop offset=".82" stop-color="#bfe7f7"/><stop offset="1" stop-color="#24495f"/></linearGradient>
+</defs>
+<path d="M78 17 Q78 8 88 8 H132 Q142 8 142 17 V92 L207 254 Q215 273 204 284 Q196 292 177 292 H43 Q24 292 16 284 Q5 273 13 254 L78 92 Z" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="7" stroke-linejoin="round"/>
+<ellipse cx="110" cy="15" rx="36" ry="10" fill="#e9f8ff" fill-opacity=".6" stroke="#31576f" stroke-width="5"/>
+<ellipse cx="110" cy="15" rx="25" ry="5" fill="#364d5b" fill-opacity=".18" stroke="#dff7ff" stroke-width="2"/>
+<path d="M89 30 V88 L32 254 Q27 269 39 278" fill="none" stroke="#ffffff" stroke-opacity=".82" stroke-width="7" stroke-linecap="round"/>
+<path d="M139 33 V91 L196 252" fill="none" stroke="#8cb5ca" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+<path d="M64 260 Q110 273 156 260" fill="none" stroke="#ffffff" stroke-opacity=".72" stroke-width="5"/>
+<g stroke="#5d7889" stroke-width="2" opacity=".8">
+ <line x1="132" y1="132" x2="164" y2="132"/><line x1="136" y1="162" x2="164" y2="162"/><line x1="140" y1="192" x2="164" y2="192"/><line x1="144" y1="222" x2="164" y2="222"/>
+</g>
+<g fill="#496577" font-family="Arial, sans-serif" font-size="11" font-weight="700"><text x="168" y="136">250</text><text x="168" y="166">200</text><text x="168" y="196">150</text><text x="168" y="226">100</text></g>
+</svg>
+</div>
+<div class="balloon item" id="balloon1" data-drag></div>
+<div class="label">2. Drop lit paper into flask → 3. Place balloon on neck</div>
+<div class="status" id="s1" style="position:absolute">Start by dragging the lighter onto the paper.</div>
+</div>
+</section>
+
+<section id="p2" class="panel">
+<div class="instructions"><b>Goal:</b> Observe how steam condensation can create a pressure difference large enough to crush a soda can.</div>
+<div><span class="timer" id="t2">Timer: 0 s</span> <button class="btn reset" onclick="reset2()">Reset</button></div>
+<div class="lab" id="lab2">
+<div class="shelf"></div>
+
+<div id="sink2" style="position:absolute;left:28px;top:75px;width:250px;height:245px;z-index:3">
+  <div style="position:absolute;left:0;right:0;bottom:0;height:94px;background:#cfd7dc;border:4px solid #7f909b;border-radius:12px 12px 24px 24px"></div>
+  <div style="position:absolute;left:24px;bottom:26px;width:202px;height:48px;background:#a9d8ef;border:3px solid #5f8397;border-radius:0 0 18px 18px"></div>
+  <div style="position:absolute;left:96px;top:4px;width:36px;height:108px;border:7px solid #697782;border-bottom:0;border-radius:22px 22px 0 0"></div>
+  <div style="position:absolute;left:125px;top:72px;width:72px;height:16px;background:#697782;border-radius:10px"></div>
+  <button id="faucetBtn2" class="btn" type="button" style="position:absolute;left:54px;top:122px;background:#3c7aa6">Faucet: OFF</button>
+  <div id="stream2" style="display:none;position:absolute;left:187px;top:88px;width:8px;height:110px;background:linear-gradient(#e7f8ff,#66bde7);border-radius:8px;opacity:.9"></div>
+</div>
+
+<div class="item" id="cyl2" data-drag style="left:315px;top:105px;width:80px;height:225px">
+<svg viewBox="0 0 80 225" width="80" height="225" aria-label="10 mL graduated cylinder">
+<defs><linearGradient id="gcGlass2" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".72"/><stop offset=".5" stop-color="#d8f1fb" stop-opacity=".25"/><stop offset="1" stop-color="#ffffff" stop-opacity=".58"/></linearGradient></defs>
+<ellipse cx="40" cy="12" rx="24" ry="7" fill="url(#gcGlass2)" stroke="#586f7e" stroke-width="3"/>
+<path d="M18 12 L18 194 Q18 208 30 211 L50 211 Q62 208 62 194 L62 12" fill="url(#gcGlass2)" stroke="#586f7e" stroke-width="3"/>
+<rect id="cylFill2" x="21" y="211" width="38" height="0" fill="#63bce6" opacity=".75"/>
+<rect x="15" y="209" width="50" height="7" rx="3" fill="#7b8b95"/><rect x="6" y="216" width="68" height="6" rx="3" fill="#7b8b95"/>
+<g stroke="#586b78" stroke-width="1.4">
+<line x1="45" y1="184" x2="58" y2="184"/><line x1="48" y1="168" x2="58" y2="168"/><line x1="45" y1="152" x2="58" y2="152"/><line x1="48" y1="136" x2="58" y2="136"/><line x1="45" y1="120" x2="58" y2="120"/><line x1="48" y1="104" x2="58" y2="104"/><line x1="45" y1="88" x2="58" y2="88"/><line x1="48" y1="72" x2="58" y2="72"/><line x1="45" y1="56" x2="58" y2="56"/><line x1="48" y1="40" x2="58" y2="40"/>
+</g>
+<g font-size="9" fill="#344955" font-family="Arial"><text x="22" y="188">1</text><text x="22" y="156">3</text><text x="22" y="124">5</text><text x="22" y="92">7</text><text x="22" y="60">9</text><text x="18" y="42">10 mL</text></g>
+</svg></div>
+
+<div class="item" id="can2" data-drag style="left:500px;top:165px;width:92px;height:150px;transform-origin:center center">
+<svg viewBox="0 0 92 150" width="92" height="150" aria-label="aluminum soda can">
+<defs><linearGradient id="canGrad2" x1="0" x2="1"><stop offset="0" stop-color="#8d969b"/><stop offset=".28" stop-color="#edf0f2"/><stop offset=".7" stop-color="#b4babd"/><stop offset="1" stop-color="#7f878c"/></linearGradient></defs>
+<ellipse cx="46" cy="11" rx="37" ry="9" fill="#cfd5d9" stroke="#5f666b" stroke-width="3"/>
+<path id="canBodyPath2" d="M10 11 Q7 20 10 30 L10 130 Q9 140 18 143 Q46 149 74 143 Q83 140 82 130 L82 30 Q85 20 82 11 Z" fill="url(#canGrad2)" stroke="#5f666b" stroke-width="3"/>
+<ellipse cx="46" cy="12" rx="25" ry="5" fill="#555f64"/><ellipse cx="46" cy="12" rx="13" ry="3.8" fill="#1e2529"/>
+<path d="M33 11 q13 -7 26 0" fill="none" stroke="#f4f6f7" stroke-width="2"/>
+<text x="46" y="85" text-anchor="middle" font-size="16" font-weight="700" fill="#52616a">SODA</text>
+</svg></div>
+
+<div id="plate2" class="hotplate" style="left:640px;top:455px;width:190px">HOT PLATE: OFF</div>
+
+<div id="pan2" style="position:absolute;left:870px;top:350px;width:260px;height:150px;border:7px solid #6f7e88;border-radius:20px;background:#d6eef9;z-index:2;overflow:hidden">
+<div id="panWater2" style="position:absolute;left:0;right:0;bottom:0;height:56px;background:#68bfe8aa;border-top:3px solid #3d99c5;transition:height .6s"></div>
+<div style="position:absolute;left:28px;bottom:44px;width:42px;height:22px;background:#f8fdff;border:2px solid #9ed7ef;transform:rotate(8deg);border-radius:5px"></div>
+<div style="position:absolute;left:98px;bottom:47px;width:36px;height:20px;background:#f8fdff;border:2px solid #9ed7ef;transform:rotate(-9deg);border-radius:5px"></div>
+<div style="position:absolute;left:172px;bottom:43px;width:44px;height:23px;background:#f8fdff;border:2px solid #9ed7ef;transform:rotate(5deg);border-radius:5px"></div>
+<div style="position:absolute;left:78px;top:18px;font-weight:700;color:#31586f">ICE WATER</div>
+</div>
+
+<div id="steamWrap2" style="position:absolute;left:0;top:0;pointer-events:none;z-index:15"></div>
+<div class="label" style="left:34px;top:22px">1. Fill cylinder to 10 mL</div>
+<div class="label" style="left:455px;top:22px">2. Pour into can</div>
+<div class="label" style="left:645px;top:405px">3. Heat for 10 s</div>
+<div class="label" style="right:55px;top:290px">4. Invert into ice water</div>
+<div class="status" id="s2" style="position:absolute;left:20px;bottom:18px;right:20px">Drag the empty graduated cylinder under the faucet, then turn the faucet on.</div>
+</div></section>
+
+
+<section id="p3" class="panel">
+<div class="instructions"><b>Goal:</b> Explore how gas volume changes when a balloon is warmed and cooled.</div>
+<div><span class="timer" id="t3">Timer: 0 s</span> <button class="btn reset" onclick="reset3()">Reset</button></div>
+<div class="lab" id="lab3">
+<div class="shelf"></div>
+
+<!-- Realistic kettle -->
+<div class="item" id="kettle3" data-drag style="left:55px;top:315px;width:210px;height:176px;transform-origin:105px 108px">
+<svg viewBox="0 0 155 130" width="210" height="176" aria-label="hot water kettle">
+  <defs>
+    <linearGradient id="ketBody3" x1="0" x2="1">
+      <stop offset="0" stop-color="#8d979e"/>
+      <stop offset=".22" stop-color="#edf1f3"/>
+      <stop offset=".56" stop-color="#bcc4c9"/>
+      <stop offset="1" stop-color="#7a858c"/>
+    </linearGradient>
+    <linearGradient id="ketGlass3" x1="0" x2="1">
+      <stop offset="0" stop-color="#e9f7fc" stop-opacity=".85"/>
+      <stop offset=".55" stop-color="#b9ddea" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#eefbff" stop-opacity=".7"/>
+    </linearGradient>
+  </defs>
+  <path d="M38 22 Q72 4 107 25 Q124 42 123 77 Q122 107 101 116 Q72 126 39 115 Q22 105 22 77 Q22 43 38 22 Z"
+        fill="url(#ketBody3)" stroke="#58656e" stroke-width="4"/>
+  <path d="M50 36 Q73 27 98 39 L98 90 Q78 100 52 91 Z" fill="url(#ketGlass3)" stroke="#758994" stroke-width="2"/>
+  <path d="M111 45 L146 33 L146 49 L119 61" fill="#8f9aa0" stroke="#58656e" stroke-width="4"/>
+  <path d="M41 22 Q32 5 56 1 H94 Q119 4 112 27" fill="none" stroke="#4f5b63" stroke-width="7" stroke-linecap="round"/>
+  <rect x="54" y="10" width="44" height="8" rx="4" fill="#66737b"/>
+  <ellipse cx="73" cy="103" rx="37" ry="8" fill="#5b666d" opacity=".45"/>
+  <path id="kettleWater3" d="M51 67 Q74 73 99 67 L99 91 Q75 99 51 91 Z" fill="#6bc4ea" opacity=".75"/>
+  <text x="73" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#42515a">HOT WATER</text>
+</svg>
+</div>
+
+<!-- Small balloon -->
+<div class="balloon ballonSmall item" id="balloon3" style="left:305px;top:365px" data-drag></div>
+
+<!-- Empty hot-water beaker -->
+<div id="beakerHot" style="position:absolute;left:440px;top:250px;width:225px;height:270px;z-index:4">
+<svg viewBox="0 0 170 205" width="225" height="270" aria-label="empty beaker">
+  <defs>
+    <linearGradient id="beakerGlass3" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".7"/>
+      <stop offset=".45" stop-color="#d8f2fb" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".56"/>
+    </linearGradient>
+  </defs>
+  <path d="M25 14 L25 173 Q25 190 42 194 H128 Q145 190 145 173 L145 14"
+        fill="url(#beakerGlass3)" stroke="#5e7482" stroke-width="4"/>
+  <ellipse cx="85" cy="14" rx="60" ry="9" fill="url(#beakerGlass3)" stroke="#5e7482" stroke-width="4"/>
+  <path d="M142 14 L158 14 L145 26" fill="none" stroke="#5e7482" stroke-width="4"/>
+  <g stroke="#6c7e88" stroke-width="1.5">
+    <line x1="112" y1="155" x2="137" y2="155"/><line x1="118" y1="130" x2="137" y2="130"/>
+    <line x1="112" y1="105" x2="137" y2="105"/><line x1="118" y1="80" x2="137" y2="80"/>
+    <line x1="112" y1="55" x2="137" y2="55"/>
+  </g>
+  <g font-size="10" fill="#43545f" font-family="Arial">
+    <text x="88" y="159">100</text><text x="88" y="109">300</text><text x="88" y="59">400 mL</text>
+  </g>
+  <path id="hotWaterFill3" d="" fill="#62bfe8" opacity=".7"/>
+  <path id="hotWaterSurface3" d="" fill="none" stroke="#2f93c2" stroke-width="2"/>
+</svg>
+</div>
+
+<!-- Realistic ice-water beaker -->
+<div id="beakerCold" style="position:absolute;left:805px;top:250px;width:225px;height:270px;z-index:4">
+<svg viewBox="0 0 170 205" width="225" height="270" aria-label="ice water beaker">
+  <defs>
+    <linearGradient id="coldGlass3" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".7"/>
+      <stop offset=".45" stop-color="#d8f2fb" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".56"/>
+    </linearGradient>
+    <linearGradient id="coldWater3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#86d7f3"/>
+      <stop offset="1" stop-color="#4caedb"/>
+    </linearGradient>
+  </defs>
+  <path d="M25 14 L25 173 Q25 190 42 194 H128 Q145 190 145 173 L145 14"
+        fill="url(#coldGlass3)" stroke="#5e7482" stroke-width="4"/>
+  <ellipse cx="85" cy="14" rx="60" ry="9" fill="url(#coldGlass3)" stroke="#5e7482" stroke-width="4"/>
+  <path d="M142 14 L158 14 L145 26" fill="none" stroke="#5e7482" stroke-width="4"/>
+  <path d="M29 95 Q84 88 141 95 L141 173 Q141 186 128 190 H42 Q29 186 29 173 Z"
+        fill="url(#coldWater3)" opacity=".82"/>
+  <path d="M29 95 Q85 87 141 95" fill="none" stroke="#2f93c2" stroke-width="3"/>
+  <g>
+    <path d="M44 89 l22 -9 l19 9 l-7 18 l-26 4 z" fill="#f8fdff" stroke="#a9dced" stroke-width="2"/>
+    <path d="M86 92 l17 -12 l22 6 l3 17 l-24 10 z" fill="#fbfeff" stroke="#a9dced" stroke-width="2"/>
+    <path d="M112 104 l18 -8 l14 11 l-6 18 l-20 3 z" fill="#f8fdff" stroke="#a9dced" stroke-width="2"/>
+    <path d="M57 116 l17 -8 l13 12 l-8 16 l-19 1 z" fill="#fbfeff" stroke="#a9dced" stroke-width="2"/>
+  </g>
+  <g opacity=".5" stroke="#ffffff" stroke-width="3">
+    <path d="M39 123 Q80 115 131 121"/><path d="M35 151 Q87 143 135 151"/>
+  </g>
+</svg>
+</div>
+
+<!-- Pour stream -->
+<div id="pourStream3" style="display:none;position:absolute;left:0;top:0;width:11px;height:120px;background:linear-gradient(#dff7ff,#5db9e4);border-radius:8px;opacity:.9;transform:rotate(18deg);transform-origin:top center;z-index:14;pointer-events:none"></div>
+
+<div class="label" style="left:46px;top:26px">1. Pour 400 mL hot water</div>
+<div class="label" style="left:440px;top:26px">2. Place balloon in hot water</div>
+<div class="label" style="right:110px;top:26px">3. Move balloon to ice water</div>
+
+<div class="status" id="s3" style="position:absolute;left:20px;bottom:20px;right:20px">
+Drag the hot-water kettle to the empty beaker. It will tilt and pour in 400 mL.
+</div>
+</div></section>
+
+
+<section id="p4" class="panel">
+<div class="instructions"><b>Goal:</b> Investigate how heating and cooling water changes the gas volume in a flask-and-balloon system.</div>
+<div><span class="timer" id="t4">Timer: 0 s</span> <button class="btn reset" onclick="reset4()">Reset</button></div>
+<div class="lab" id="lab4">
+<div class="shelf"></div>
+
+<!-- Flask/balloon assembly starts far left -->
+<div class="item" id="flask4" data-drag style="left:70px;top:250px;width:210px;height:285px;z-index:8">
+ <svg viewBox="0 0 210 285" width="210" height="285" aria-label="Erlenmeyer flask with water">
+  <defs>
+   <linearGradient id="glass4" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".72"/><stop offset=".48" stop-color="#dff4fb" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity=".58"/></linearGradient>
+  </defs>
+  <path d="M78 20 L78 100 L25 225 Q16 247 34 258 Q63 274 105 274 Q147 274 176 258 Q194 247 185 225 L132 100 L132 20 Z"
+        fill="url(#glass4)" stroke="#435d6d" stroke-width="6" stroke-linejoin="round"/>
+  <ellipse cx="105" cy="20" rx="27" ry="8" fill="#eaf8fd" fill-opacity=".7" stroke="#435d6d" stroke-width="6"/>
+  <path d="M34 230 Q105 214 176 230 L181 246 Q183 255 173 260 Q105 282 37 260 Q27 255 29 246 Z" fill="#65bfe8" opacity=".72"/>
+  <path d="M34 230 Q105 214 176 230" fill="none" stroke="#2e91bf" stroke-width="3"/>
+  <g stroke="#607784" stroke-width="2"><line x1="132" y1="135" x2="153" y2="135"/><line x1="139" y1="165" x2="160" y2="165"/><line x1="146" y1="195" x2="167" y2="195"/></g>
+  <g id="boil4" style="display:none" fill="#fff" opacity=".85">
+   <circle cx="75" cy="242" r="5"/><circle cx="100" cy="250" r="4"/><circle cx="127" cy="239" r="6"/><circle cx="148" cy="250" r="4"/>
+  </g>
+ </svg>
+ <div id="balloon4" class="attached-deflated4"
+ style="position:absolute;left:38px;top:-155px;width:134px;height:260px;pointer-events:none;z-index:12">
+ <svg viewBox="0 0 134 260" width="134" height="260"
+      aria-label="balloon attached to the flask mouth">
+  <defs>
+   <linearGradient id="balloonDefGrad4" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#9c7be0"/>
+    <stop offset=".45" stop-color="#7156c4"/>
+    <stop offset="1" stop-color="#443286"/>
+   </linearGradient>
+   <radialGradient id="balloonInflGrad4" cx=".33" cy=".24" r=".82">
+    <stop offset="0" stop-color="#f8a0ea"/>
+    <stop offset=".38" stop-color="#e865d5"/>
+    <stop offset=".78" stop-color="#c23db6"/>
+    <stop offset="1" stop-color="#97278c"/>
+   </radialGradient>
+  </defs>
+
+  <!-- Fixed latex band wrapped around the rim -->
+  <path id="balloonLip4"
+        d="M37 178
+           C45 172 55 171 67 172
+           C79 171 89 172 97 178
+           L97 191
+           C84 195 50 195 37 191 Z"
+        fill="url(#balloonDefGrad4)" stroke="#37266f" stroke-width="3"/>
+
+  <!-- Deflated balloon hangs to the LEFT -->
+  <g id="balloonDeflatedGroup4">
+    <path id="balloonDeflatedBody4"
+          d="M50 178
+             C39 173 27 175 18 186
+             C7 199 4 218 11 233
+             C18 249 32 256 45 252
+             C58 248 65 236 64 221
+             C63 205 58 191 50 178 Z"
+          fill="url(#balloonDefGrad4)" stroke="#37266f" stroke-width="3"/>
+    <path d="M24 194 C17 207 17 221 23 232"
+          fill="none" stroke="#d2c8f4" stroke-width="4"
+          stroke-linecap="round" opacity=".72"/>
+  </g>
+
+  <!-- Inflated balloon: independent upright shape centered over flask -->
+  <g id="balloonInflatedGroup4">
+    <path id="balloonInflatedBody4"
+          d="M48 170
+             C45 157 38 150 30 143
+             C14 129 9 107 14 84
+             C20 54 41 31 67 29
+             C93 31 114 54 120 84
+             C125 107 120 129 104 143
+             C96 150 89 157 86 170
+             L84 181
+             C78 185 56 185 50 181 Z"
+          fill="url(#balloonInflGrad4)" stroke="#7f1f77" stroke-width="3"/>
+    <path d="M45 63 C52 48 61 42 71 41"
+          fill="none" stroke="#ffd0f6" stroke-width="6"
+          stroke-linecap="round" opacity=".72"/>
+  </g>
+ </svg>
+</div>
+</div>
+
+<!-- Hot plate centered -->
+<div id="plate4" class="hotplate" style="left:475px;top:475px;width:220px">HOT PLATE: OFF</div>
+
+<!-- Ice-water pan far right -->
+<div id="pan4" style="position:absolute;left:825px;top:390px;width:300px;height:145px;border:7px solid #6f7e88;border-radius:22px;background:#d9f1fa;z-index:3;overflow:hidden">
+ <div style="position:absolute;left:0;right:0;bottom:0;height:68px;background:#65bde7aa;border-top:3px solid #3895c1"></div>
+ <div style="position:absolute;left:35px;bottom:55px;width:48px;height:25px;background:#fbfeff;border:2px solid #a6daee;border-radius:6px;transform:rotate(8deg)"></div>
+ <div style="position:absolute;left:118px;bottom:58px;width:42px;height:24px;background:#fbfeff;border:2px solid #a6daee;border-radius:6px;transform:rotate(-8deg)"></div>
+ <div style="position:absolute;left:205px;bottom:54px;width:50px;height:26px;background:#fbfeff;border:2px solid #a6daee;border-radius:6px;transform:rotate(5deg)"></div>
+ <div style="position:absolute;left:96px;top:18px;font-weight:700;color:#31586f">ICE WATER</div>
+</div>
+
+<div class="label" style="left:55px;top:25px">1. Flask starts here</div>
+<div class="label" style="left:500px;top:415px">2. Heat the flask</div>
+<div class="label" style="right:75px;top:330px">3. Cool in ice water</div>
+<div class="status" id="s4" style="position:absolute;left:20px;bottom:18px;right:20px">Drag the flask from the far left onto the hot plate in the middle of the countertop.</div>
+</div></section>
+
+<script>
+const $=id=>document.getElementById(id);
+let state={};
+
+function setupDrag(labId){
+ const lab=$(labId);
+ lab.querySelectorAll('[data-drag]').forEach(el=>{
+   let dragging=false,ox=0,oy=0;
+   el.addEventListener('pointerdown',e=>{
+     dragging=true; el.setPointerCapture(e.pointerId);
+     const r=el.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top;
+   });
+   el.addEventListener('pointermove',e=>{
+     if(!dragging)return;
+     const lr=lab.getBoundingClientRect();
+     let x=e.clientX-lr.left-ox,y=e.clientY-lr.top-oy;
+     x=Math.max(0,Math.min(lab.clientWidth-el.offsetWidth,x)); y=Math.max(0,Math.min(lab.clientHeight-el.offsetHeight,y));
+     el.style.left=x+'px'; el.style.top=y+'px';
+     
+   });
+   el.addEventListener('pointerup',e=>{dragging=false; try{el.releasePointerCapture(e.pointerId)}catch(_){} checkDrops(labId,el)});
+   el.addEventListener('pointercancel',()=>{dragging=false});
+ });
+}
+function center(el){let r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}}
+function inside(a,b,pad=0){let A=a.getBoundingClientRect(),B=b.getBoundingClientRect();let c=center(a);return c.x>B.left-pad&&c.x<B.right+pad&&c.y>B.top-pad&&c.y<B.bottom+pad}
+
+function timer(id,seconds,cb){
+ let n=0; $(id).textContent='Timer: 0 s';
+ let iv=setInterval(()=>{n++;$(id).textContent='Timer: '+n+' s';if(n>=seconds){clearInterval(iv);cb()}},1000);
+ return iv;
+}
+
+/* Section 1 */
+function checkDrops(labId,el){
+ if(labId==='lab1'){
+   if(el.id==='lighter' && inside(el,$('paper'),25)){ $('paper').classList.add('lit');$('s1').textContent='Paper is lit! Now drag the lit paper into the Erlenmeyer flask.'; }
+   else if(el.id==='paper' && $('paper').classList.contains('lit') && inside(el,$('flask1'),35)){
+     const f=$('flask1');
+     $('paper').style.left=(f.offsetLeft+82)+'px';
+     $('paper').style.top=(f.offsetTop+235)+'px';
+     state.paperInFlask=true;
+     $('s1').textContent='Paper is burning at the very bottom of the flask. Place the water balloon over the flask opening.';
+   } else if(el.id==='balloon1' && inside(el,$('flask1'),55) && state.paperInFlask){
+     const f=$('flask1'), b=$('balloon1');
+     b.style.left=(f.offsetLeft+61)+'px';
+     b.style.top=(f.offsetTop-104)+'px';
+     b.style.transform='';
+     $('s1').textContent='Balloon sealed on the flask. Watch the timer: after 10 s it begins squeezing through the neck.';
+     timer('t1',10,()=>{
+       $('s1').textContent='The balloon is being squeezed through the narrow neck while remaining inside the flask opening.';
+       b.classList.add('anim-suck');
+       timer('t1',10,()=>{
+         b.classList.remove('anim-suck');
+         b.style.left=(f.offsetLeft+61)+'px';
+         b.style.top=(f.offsetTop+207)+'px';
+         b.style.transform='rotate(14deg) scale(.78,.52)';
+         $('paper').classList.remove('lit');
+         $('paper').style.background='#c8c1b6';
+         $('paper').style.color='#5d5750';
+         $('paper').style.boxShadow='none';
+         $('s1').textContent='Observation complete: the flame is out and the balloon is fully inside the flask, resting within the glass walls at the bottom.';
+       });
+     });
+   }
+ }
+ if(labId==='lab2'){
+   if(el.id==='cyl2'){
+     if(inside(el,$('sink2'),45) && !state.cylFilled2){
+       state.cylUnderSink2=true;
+       $('s2').textContent='Graduated cylinder is under the faucet. Click the faucet button to add water to 10 mL.';
+     } else if(state.cylFilled2 && inside(el,$('can2'),55) && !state.waterInCan2){
+       pourCylinder2();
+     }
+   } else if(el.id==='can2'){
+     if(state.waterInCan2 && inside(el,$('plate2'),80) && !state.hot2){
+       $('can2').style.left='690px'; $('can2').style.top='305px';
+       $('s2').textContent='Can is on the hot plate. Click the hot plate to turn it on.';
+     } else if(state.hot2 && state.steamReady2 && inside(el,$('pan2'),90) && !state.crushed2){
+       invertAndCrush2();
+     }
+   }
+ }
+ if(labId==='lab3'){
+   if(el.id==='kettle3' && inside(el,$('beakerHot'),90) && !state.hotWater){
+     pourKettle3();
+   } else if(el.id==='balloon3' && state.hotWater && inside(el,$('beakerHot'),80) && !state.balloonHeated3){
+     state.balloonHeated3=true;
+     $('balloon3').style.left='505px';$('balloon3').style.top='360px';
+     $('s3').textContent='The balloon is warming. Over 10 seconds it expands while remaining inside the beaker.';
+     timer('t3',10,()=>{ $('balloon3').classList.add('balloon-hot3');$('s3').textContent='The gas is expanding as its temperature increases.';
+       setTimeout(()=>{$('s3').textContent='Expansion complete. Drag the enlarged balloon to the ice-water beaker.'},10000);
+     });
+   } else if(el.id==='balloon3' && state.hotWater && state.balloonHeated3 && inside(el,$('beakerCold'),80)){
+     $('balloon3').classList.remove('balloon-hot3');$('balloon3').style.left='870px';$('balloon3').style.top='385px';$('balloon3').classList.add('balloon-cold3');$('s3').textContent='Cooling in ice water: the balloon contracts over 10 seconds.';
+     timer('t3',10,()=>{$('balloon3').classList.remove('balloon-cold3');$('s3').textContent='Observation complete: cooling caused the gas volume to decrease.'});
+   }
+ }
+ if(labId==='lab4'){
+   if(el.id==='flask4' && inside(el,$('plate4'),100) && !state.hot4){
+     $('flask4').style.left='480px';$('flask4').style.top='210px';
+     $('s4').textContent='Flask is centered on the hot plate. Click the hot plate to turn it on.';
+   } else if(el.id==='flask4' && state.hot4 && inside(el,$('pan4'),110) && !state.cooling4){
+     state.cooling4=true;
+     $('flask4').style.left='865px';$('flask4').style.top='225px';
+     cool4();
+   }
+ }
+}
+
+function setCylinderWater2(frac){
+ const h=166*Math.max(0,Math.min(1,frac)), y=211-h;
+ $('cylFill2').setAttribute('y',String(y)); $('cylFill2').setAttribute('height',String(h));
+}
+function fillCylinder2(){
+ if(!state.cylUnderSink2 || state.cylFilled2){ if(!state.cylUnderSink2)$('s2').textContent='Move the graduated cylinder under the faucet first.'; return; }
+ $('faucetBtn2').textContent='Faucet: ON'; $('stream2').style.display='block'; $('s2').textContent='Filling to exactly 10 mL...';
+ let n=0; const iv=setInterval(()=>{n++;setCylinderWater2(n/10);if(n>=10){clearInterval(iv);state.cylFilled2=true;$('stream2').style.display='none';$('faucetBtn2').textContent='Faucet: OFF';$('s2').textContent='10 mL measured. Drag the graduated cylinder to the top of the soda can.';}},120);
+}
+function pourCylinder2(){
+ if(state.waterInCan2)return;
+ state.waterInCan2=true; const c=$('cyl2');
+ c.style.transition='left .35s, top .35s, transform .35s'; c.style.left='455px'; c.style.top='75px'; c.style.transform='rotate(62deg)';
+ $('s2').textContent='Pouring the measured 10 mL into the soda can...';
+ let n=10; const iv=setInterval(()=>{n--;setCylinderWater2(n/10);if(n<=0){clearInterval(iv);setTimeout(()=>{c.style.transform='none';c.style.left='315px';c.style.top='105px';$('s2').textContent='Water added. Drag the soda can onto the hot plate.';},350);}},90);
+}
+function heat2(){
+ if(!state.waterInCan2){$('s2').textContent='Add the 10 mL of water to the can first.';return;}
+ if(state.hot2)return;
+ const cr=$('can2').getBoundingClientRect(), pr=$('plate2').getBoundingClientRect();
+ if(!(cr.left<pr.right&&cr.right>pr.left&&Math.abs(cr.bottom-pr.top)<120)){ $('s2').textContent='Place the soda can on the hot plate first.';return; }
+ state.hot2=true; $('plate2').classList.add('on'); $('plate2').textContent='HOT PLATE: ON'; $('s2').textContent='Heating the can. Steam will appear after 10 seconds.';
+ timer('t2',10,()=>{state.steamReady2=true;const labR=$('lab2').getBoundingClientRect(),canR=$('can2').getBoundingClientRect(),wrap=$('steamWrap2');wrap.innerHTML='';for(let i=0;i<4;i++){const st=document.createElement('div');st.className='steam';st.style.opacity='1';st.style.left=(canR.left-labR.left+38+i*4)+'px';st.style.top=(canR.top-labR.top-45)+'px';st.style.animationDelay=(i*.2)+'s';wrap.appendChild(st);} $('s2').textContent='Steam is rising directly from the can opening. Drag the can to the ice-water pan.';});
+}
+function invertAndCrush2(){
+ state.crushed2=true; const can=$('can2'); can.style.transition='left .5s, top .5s, transform .65s'; can.style.left='953px';can.style.top='338px';can.style.transform='rotate(180deg)';$('s2').textContent='The can flips mouth-side down into the ice water...';
+ setTimeout(()=>{$('canBodyPath2').setAttribute('d','M20 11 Q12 20 21 34 Q31 48 20 66 Q12 84 22 101 Q32 119 20 143 Q46 149 72 143 Q60 119 70 101 Q80 84 71 66 Q60 48 71 34 Q80 20 72 11 Z');$('panWater2').style.height='48px';$('steamWrap2').innerHTML='';$('s2').textContent='The can crushed inward from the sides while remaining the same height. The ice-water level decreased slightly.';},700);
+}
+
+function fillHotBeaker3(frac){
+  frac=Math.max(0,Math.min(1,frac));
+  const top=190 - 125*frac;
+  const bottom=190;
+  const d=`M29 ${top} Q85 ${top-5} 141 ${top} L141 173 Q141 186 128 190 H42 Q29 186 29 173 Z`;
+  $('hotWaterFill3').setAttribute('d',d);
+  $('hotWaterSurface3').setAttribute('d',`M29 ${top} Q85 ${top-5} 141 ${top}`);
+}
+function pourKettle3(){
+ if(state.hotWater) return;
+ state.hotWater=true;
+ const k=$('kettle3');
+ k.style.transition='left .45s, top .45s, transform .45s';
+ k.style.left='255px'; k.style.top='220px'; k.style.transform='rotate(48deg)';
+ const stream=$('pourStream3');
+ stream.style.left='447px'; stream.style.top='318px'; stream.style.display='block';
+ $('s3').textContent='Pouring hot water into the beaker to the 400 mL level...';
+ let n=0;
+ const iv=setInterval(()=>{
+   n++;
+   fillHotBeaker3(n/10);
+   if(n>=10){
+     clearInterval(iv);
+     stream.style.display='none';
+     setTimeout(()=>{
+       k.style.transform='none';
+       k.style.left='55px';k.style.top='315px';
+       $('s3').textContent='400 mL of hot water added. Drag the small balloon into the hot-water beaker.';
+     },350);
+   }
+ },110);
+}
+function heat4(){
+ if(state.hot4)return;
+ const fr=$('flask4').getBoundingClientRect(),pr=$('plate4').getBoundingClientRect();
+ if(!(fr.left<pr.right&&fr.right>pr.left&&Math.abs(fr.bottom-pr.top)<150)){
+   $('s4').textContent='Drag the flask onto the hot plate first.';
+   return;
+ }
+ state.hot4=true;
+ $('plate4').classList.add('on');
+ $('plate4').textContent='HOT PLATE: ON';
+ $('boil4').style.display='block';
+ $('balloon4').className='attached-inflating4';
+ $('s4').textContent='The water is boiling and the balloon is inflating straight upward from the flask mouth.';
+ timer('t4',10,()=>{
+   $('balloon4').className='attached-inflated4';
+   $('s4').textContent='The balloon is fully inflated and standing upright above the flask. Drag the flask to the ice-water pan.';
+ });
+}
+
+function cool4(){
+ $('boil4').style.display='none';
+ $('balloon4').className='attached-deflating4';
+ $('s4').textContent='Cooling in ice water. The balloon is deflating back to its original left-hanging shape.';
+ timer('t4',10,()=>{
+   $('balloon4').className='attached-deflated4';
+   $('s4').textContent='Observation complete: the balloon is deflated and hanging over the left side of the flask.';
+ });
+}
+
+function reset2(){
+ state.cylUnderSink2=false;state.cylFilled2=false;state.waterInCan2=false;state.hot2=false;state.steamReady2=false;state.crushed2=false;
+ const cyl=$('cyl2'),can=$('can2');
+ cyl.style.left='315px';cyl.style.top='105px';cyl.style.transform='none';cyl.style.transition='';
+ setCylinderWater2(0);
+ can.style.left='500px';can.style.top='165px';can.style.transform='none';can.style.transition='';
+ $('canBodyPath2').setAttribute('d','M10 11 Q7 20 10 30 L10 130 Q9 140 18 143 Q46 149 74 143 Q83 140 82 130 L82 30 Q85 20 82 11 Z');
+ $('plate2').classList.remove('on');$('plate2').textContent='HOT PLATE: OFF';
+ $('panWater2').style.height='56px';$('steamWrap2').innerHTML='';
+ $('faucetBtn2').textContent='Faucet: OFF';$('stream2').style.display='none';
+ $('t2').textContent='Timer: 0 s';
+ $('s2').textContent='Drag the empty graduated cylinder under the faucet, then turn the faucet on.';
+}
+
+function reset3(){
+ state.hotWater=false;state.balloonHeated3=false;
+ const k=$('kettle3'),b=$('balloon3');
+ k.style.left='55px';k.style.top='315px';k.style.transform='none';k.style.transition='';
+ b.className='balloon ballonSmall item';b.style.left='305px';b.style.top='365px';b.style.transform='';
+ fillHotBeaker3(0);$('pourStream3').style.display='none';
+ $('t3').textContent='Timer: 0 s';
+ $('s3').textContent='Drag the hot-water kettle to the empty beaker. It will tilt and pour in 400 mL.';
+}
+
+function reset4(){
+ state.hot4=false;state.cooling4=false;
+ const f=$('flask4');
+ f.style.left='70px';f.style.top='250px';
+ $('balloon4').className='attached-deflated4';
+ // Explicitly restore the reference-style sagging paths.
+ $('balloonBody4').setAttribute('d','M31 66 C23 69 17 76 12 87 C6 100 4 117 8 130 C12 144 22 151 34 151 C47 151 58 143 64 132 C70 120 68 107 62 96 C56 84 48 75 40 70 C37 68 34 67 31 66 Z');
+ $('balloonHighlight4').setAttribute('d','M20 90 C16 102 16 116 20 126');
+ $('plate4').classList.remove('on');$('plate4').textContent='HOT PLATE: OFF';
+ $('boil4').style.display='none';$('t4').textContent='Timer: 0 s';
+ $('s4').textContent='Drag the flask from the far left onto the hot plate in the middle of the countertop.';
+}
+
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));$('p'+b.dataset.tab).classList.add('active')});
+['lab1','lab2','lab3','lab4'].forEach(setupDrag);
+$('balloon4').className='attached-deflated4';
+$('faucetBtn2').addEventListener('click',fillCylinder2);
+$('plate2').addEventListener('click',heat2);
+$('plate4').addEventListener('click',heat4);
+</script>
+
+<script>
+(function(){
+  function reportHeight(){
+    try{
+      var h=Math.max(
+        document.documentElement.scrollHeight,
+        document.body ? document.body.scrollHeight : 0
+      );
+      window.parent.postMessage({type:'gas-laws-lab-height',height:h},'*');
+    }catch(e){}
+  }
+  window.addEventListener('load',reportHeight);
+  window.addEventListener('resize',reportHeight);
+  setTimeout(reportHeight,300);
+  setTimeout(reportHeight,1200);
+})();
+</script>
+
+</body>
+</html>
